@@ -1,0 +1,39 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Spring Boot backend build output
+backend-api/target/
+
+# SQLite database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files and private credentials
+.env
+.env.*
+!.env.example
+*service-account*.json
+*.jks
+*.keystore
+
+# Flutter generated files
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Android Studio IDE settings
+.idea/
