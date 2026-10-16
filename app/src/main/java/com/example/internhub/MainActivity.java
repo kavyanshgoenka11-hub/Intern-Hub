@@ -10,6 +10,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import android.content.Intent;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "InternHubDB";
@@ -33,6 +35,16 @@ public class MainActivity extends AppCompatActivity {
                     return insets;
                 }
         );
+
+        // Open Internship Explorer when the card is clicked
+        findViewById(R.id.cardInternships).setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    InternshipActivity.class
+            );
+
+            startActivity(intent);
+        });
 
         // Initialize the database helper
         databaseHelper = new DatabaseHelper(this);
