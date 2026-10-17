@@ -21,6 +21,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".InternshipActivity"
+            android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".AdminAddInternshipActivity"
+            android:exported="false" >
+        </activity>
+
     </application>
 
 </manifest>
