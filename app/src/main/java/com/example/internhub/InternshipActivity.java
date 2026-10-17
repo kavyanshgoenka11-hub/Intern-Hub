@@ -8,11 +8,19 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class InternshipActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
+    private ListenerRegistration internshipListener;
     private LinearLayout internshipList;
     private TextView tvInternshipCount;
 
@@ -30,102 +38,131 @@ public class InternshipActivity extends AppCompatActivity {
 
         btnBack.setOnClickListener(v -> finish());
 
-        loadInternships();
+        loadInternshipsFromCloud();
     }
 
-    private void loadInternships() {
+    private void loadInternshipsFromCloud() {
 
         internshipList.removeAllViews();
 
-        Cursor cursor = databaseHelper.getApprovedInternships();
+        internshipListener = FirebaseFirestore.getInstance()
+                .collection("internships")
+                .whereEqualTo("status", "approved")
+                .addSnapshotListener((snapshots, error) -> {
 
-        int count = cursor.getCount();
+                    if (error != null) {
+                        tvInternshipCount.setText(
+                                "Unable to load internships"
+                        );
 
-        tvInternshipCount.setText(
-                "Available internships (" + count + ")"
-        );
+                        android.util.Log.e(
+                                "InternHubCloud",
+                                "Failed to read internships",
+                                error
+                        );
 
-        if (count == 0) {
-            TextView emptyMessage = createTextView(
-                    "No internships available yet.\nPlease check again later.",
-                    14,
-                    "#68788A"
-            );
+                        return;
+                    }
 
-            emptyMessage.setGravity(Gravity.CENTER);
-            emptyMessage.setPadding(20, 40, 20, 40);
+                    if (snapshots == null) {
+                        return;
+                    }
 
-            internshipList.addView(emptyMessage);
-            cursor.close();
-            return;
-        }
+                    internshipList.removeAllViews();
 
-        try {
-            while (cursor.moveToNext()) {
+                    List<String> activeCloudIds = new ArrayList<>();
 
-                String title = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                DatabaseHelper.COL_TITLE
-                        )
-                );
+                    int count = 0;
 
-                String company = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                DatabaseHelper.COL_COMPANY
-                        )
-                );
+                    for (DocumentSnapshot document :
 
-                String domain = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                DatabaseHelper.COL_DOMAIN
-                        )
-                );
+                            snapshots.getDocuments()) {
 
-                String skills = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                DatabaseHelper.COL_SKILLS
-                        )
-                );
+                        String status = document.getString("status");
 
-                String location = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                DatabaseHelper.COL_LOCATION
-                        )
-                );
+                        if (!"approved".equals(status)) {
+                            continue;
+                        }
 
-                String workMode = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                DatabaseHelper.COL_WORK_MODE
-                        )
-                );
+                        activeCloudIds.add(document.getId());
 
-                String stipend = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                DatabaseHelper.COL_STIPEND
-                        )
-                );
+                        String title = document.getString("title");
+                        String company = document.getString("company");
+                        String domain = document.getString("domain");
+                        String skills = document.getString("required_skills");
+                        String location = document.getString("location");
+                        String workMode = document.getString("work_mode");
+                        String stipend = document.getString("stipend");
+                        String deadline = document.getString("deadline");
+                        String description = document.getString("description");
+                        String applicationUrl = document.getString("application_url");
 
-                String deadline = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                DatabaseHelper.COL_DEADLINE
-                        )
-                );
+// Save or update this cloud record in local SQLite
+                        long localId = databaseHelper.upsertCloudInternship(
+                                document.getId(),
+                                title,
+                                company,
+                                domain,
+                                skills,
+                                description,
+                                location,
+                                workMode,
+                                stipend,
+                                deadline,
+                                applicationUrl,
+                                status
+                        );
 
-                addInternshipCard(
-                        title,
-                        company,
-                        domain,
-                        skills,
-                        location,
-                        workMode,
-                        stipend,
-                        deadline
-                );
-            }
+                        if (localId == -1) {
+                            android.util.Log.e(
+                                    "InternHubSync",
+                                    "Failed to sync internship: " + document.getId()
+                            );
+                        }
 
-        } finally {
-            cursor.close();
-        }
+                        addInternshipCard(
+                                title == null ? "" : title,
+                                company == null ? "" : company,
+                                domain == null ? "" : domain,
+                                skills == null ? "" : skills,
+                                location == null ? "" : location,
+                                workMode == null ? "" : workMode,
+                                stipend == null ? "" : stipend,
+                                deadline == null ? "" : deadline
+                        );
+
+                        count++;
+                    }
+
+                    // Delete stale cloud records only after a server-confirmed snapshot.
+                    if (!snapshots.getMetadata().isFromCache()
+                            && !snapshots.getMetadata().hasPendingWrites()) {
+
+                        int removedCount =
+                                databaseHelper.deleteCloudInternshipsNotIn(activeCloudIds);
+
+                        android.util.Log.d(
+                                "InternHubSync",
+                                "Stale cloud records removed: " + removedCount
+                        );
+                    }
+
+                    tvInternshipCount.setText("Available internships (" + count + ")");
+
+                    if (count == 0) {
+                        TextView emptyMessage = createTextView(
+                                "No internships available yet.\n"
+                                        + "Please check again later.",
+                                14,
+                                "#68788A"
+                        );
+
+                        emptyMessage.setGravity(Gravity.CENTER);
+                        emptyMessage.setPadding(20, 40, 20, 40);
+
+                        internshipList.addView(emptyMessage);
+                    }
+                });
     }
 
     private void addInternshipCard(
@@ -225,6 +262,9 @@ public class InternshipActivity extends AppCompatActivity {
     protected void onDestroy() {
 
         if (databaseHelper != null) {
+            if (internshipListener != null) {
+                internshipListener.remove();
+            }
             databaseHelper.close();
         }
 
