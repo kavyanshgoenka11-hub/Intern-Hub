@@ -6,6 +6,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.util.Log;
+
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class AdminAddInternshipActivity extends AppCompatActivity {
@@ -56,6 +64,7 @@ public class AdminAddInternshipActivity extends AppCompatActivity {
         String domain = etDomain.getText().toString().trim();
         String skills = etSkills.getText().toString().trim();
 
+        // Validate required fields
         if (title.isEmpty()) {
             etTitle.setError("Enter the internship title");
             etTitle.requestFocus();
@@ -80,35 +89,68 @@ public class AdminAddInternshipActivity extends AppCompatActivity {
             return;
         }
 
+        String description =
+                etDescription.getText().toString().trim();
 
-        String description = etDescription.getText().toString().trim();
-        String location = etLocation.getText().toString().trim();
-        String workMode = etWorkMode.getText().toString().trim();
-        String stipend = etStipend.getText().toString().trim();
-        String deadline = etDeadline.getText().toString().trim();
-        String applicationUrl = etApplicationUrl.getText().toString().trim();
+        String location =
+                etLocation.getText().toString().trim();
 
-        // Insert the internship into SQLite
-        long insertedId = databaseHelper.insertInternship(
-                title,
-                company,
-                domain,
-                skills,
-                description,
-                location,
-                workMode,
-                stipend,
-                deadline,
-                applicationUrl
-        );
+        String workMode =
+                etWorkMode.getText().toString().trim();
 
-        if (insertedId == -1) {
-            Toast.makeText(this, "Could not save internship. Please try again.", Toast.LENGTH_LONG).show();
+        String stipend =
+                etStipend.getText().toString().trim();
 
-        } else {
-            Toast.makeText(this, "Internship saved successfully!", Toast.LENGTH_LONG).show();
-            finish();
-        }
+        String deadline =
+                etDeadline.getText().toString().trim();
+
+        String applicationUrl =
+                etApplicationUrl.getText().toString().trim();
+
+        // Prepare the internship document
+        Map<String, Object> internship = new HashMap<>();
+
+        internship.put("title", title);
+        internship.put("company", company);
+        internship.put("domain", domain);
+        internship.put("required_skills", skills);
+        internship.put("description", description);
+        internship.put("location", location);
+        internship.put("work_mode", workMode);
+        internship.put("stipend", stipend);
+        internship.put("deadline", deadline);
+        internship.put("application_url", applicationUrl);
+        internship.put("status", "approved");
+        internship.put("created_at", FieldValue.serverTimestamp());
+
+        // Save to Cloud Firestore
+        FirebaseFirestore.getInstance()
+                .collection("internships")
+                .add(internship)
+                .addOnSuccessListener(documentReference -> {
+
+                    Toast.makeText(
+                            AdminAddInternshipActivity.this,
+                            "Internship saved to cloud successfully!",
+                            Toast.LENGTH_LONG
+                    ).show();
+
+                    finish();
+                })
+                .addOnFailureListener(exception -> {
+
+                    Log.e(
+                            "InternHubCloud",
+                            "Failed to save internship",
+                            exception
+                    );
+
+                    Toast.makeText(
+                            AdminAddInternshipActivity.this,
+                            "Cloud save failed. Check access and connection.",
+                            Toast.LENGTH_LONG
+                    ).show();
+                });
     }
 
     @Override
