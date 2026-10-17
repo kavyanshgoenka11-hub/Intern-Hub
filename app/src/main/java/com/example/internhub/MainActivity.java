@@ -46,6 +46,16 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // Open the Admin Add Internship screen
+        findViewById(R.id.btnOpenAdmin).setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    AdminAddInternshipActivity.class
+            );
+
+            startActivity(intent);
+        });
+
         // Initialize the database helper
         databaseHelper = new DatabaseHelper(this);
         testDatabase();

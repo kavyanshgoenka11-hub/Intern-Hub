@@ -13,6 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=" ←  Back to dashboard"
+        android:layout_marginTop="30dp"
         android:textColor="#3B638D"
         android:textSize="14sp"
         android:padding="8dp"

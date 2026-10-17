@@ -347,6 +347,19 @@
 
         </LinearLayout>
 
+        <!-- Temporary admin entry point for development -->
+        <Button
+            android:id="@+id/btnOpenAdmin"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="#163653"
+            android:text="Admin: Add Internship"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp" />
+
+
         <!-- Footer -->
         <TextView
             android:layout_width="match_parent"
