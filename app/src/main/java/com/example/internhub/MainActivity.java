@@ -12,6 +12,16 @@ import androidx.core.view.WindowInsetsCompat;
 
 import android.content.Intent;
 
+import com.google.firebase.auth.FirebaseAuth;
+
+import android.widget.TextView;
+import com.google.firebase.auth.FirebaseUser;
+
+import android.view.Menu;
+import android.widget.PopupMenu;
+import androidx.appcompat.app.AlertDialog;
+import com.google.firebase.auth.FirebaseUser;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "InternHubDB";
@@ -22,8 +32,138 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Check whether the user is logged in
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+
+            Intent authIntent = new Intent(MainActivity.this, AuthActivity.class);
+
+            startActivity(authIntent);
+            finish();
+            return;
+        }
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        // Profile dropdown menu
+        TextView btnProfileMenu = findViewById(R.id.btnProfileMenu);
+
+        btnProfileMenu.setOnClickListener(view -> {
+
+            PopupMenu popupMenu = new PopupMenu(MainActivity.this, view);
+
+            popupMenu.getMenu().add(Menu.NONE, 1, 1, "My Account");
+            popupMenu.getMenu().add(Menu.NONE, 2, 2, "Help & Support");
+            popupMenu.getMenu().add(Menu.NONE, 3, 3, "Log Out");
+
+            popupMenu.setOnMenuItemClickListener(item -> {
+
+                if (item.getItemId() == 1) {
+
+                    FirebaseUser user =
+                            FirebaseAuth.getInstance().getCurrentUser();
+
+                    String name = "Student";
+                    String email = "Not available";
+
+                    if (user != null) {
+                        if (user.getDisplayName() != null
+                                && !user.getDisplayName().trim().isEmpty()) {
+                            name = user.getDisplayName();
+                        }
+
+                        if (user.getEmail() != null) {
+                            email = user.getEmail();
+                        }
+                    }
+
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("My Account")
+                            .setMessage("Name: " + name + "\nEmail: " + email)
+                            .setPositiveButton("Close", null)
+                            .show();
+
+                    return true;
+
+                } else if (item.getItemId() == 2) {
+
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Help & Support")
+                            .setMessage(
+                                    "Welcome to Intern Hub.\n\n"
+                                            + "Use the dashboard to explore internships, "
+                                            + "career preparation and mentorship.\n\n"
+                                            + "For further assistance : \n\n Contact: "
+                                            + "Email : placeecom@nmims.in \n"
+                                            + "Phone: 1234-5678"
+                            )
+                            .setPositiveButton("Close", null)
+                            .show();
+
+                    return true;
+
+                } else if (item.getItemId() == 3) {
+
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Log Out")
+                            .setMessage("Are you sure you want to log out?")
+                            .setNegativeButton("Cancel", null)
+                            .setPositiveButton("Log Out", (dialog, which) -> {
+
+                                FirebaseAuth.getInstance().signOut();
+
+                                Intent intent = new Intent(
+                                        MainActivity.this,
+                                        AuthActivity.class
+                                );
+
+                                intent.addFlags(
+                                        Intent.FLAG_ACTIVITY_NEW_TASK
+                                                | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                );
+
+                                startActivity(intent);
+                                finish();
+                            })
+                            .show();
+
+                    return true;
+                }
+
+                return false;
+            });
+
+            popupMenu.show();
+        });
+
+        // Display the logged-in user's name
+        TextView tvWelcome = findViewById(R.id.tvWelcome);
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        String displayName = null;
+
+        if (user != null) {
+            displayName = user.getDisplayName();
+        }
+
+// Fallback for accounts that do not have a saved display name
+        if (displayName == null || displayName.trim().isEmpty()) {
+
+            if (user != null && user.getEmail() != null) {
+                String email = user.getEmail();
+
+                if (email.contains("@")) {
+                    displayName = email.substring(0, email.indexOf("@"));
+                }
+            }
+
+            if (displayName == null || displayName.trim().isEmpty()) {
+                displayName = "Student";
+            }
+        }
+
+        tvWelcome.setText("Welcome back, " + displayName + " 👋");
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main), (v, insets) -> {
