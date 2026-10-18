@@ -1,10 +1,15 @@
 package com.example.internhub;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.DatePickerDialog;
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 import android.util.Log;
 
@@ -47,6 +52,7 @@ public class AdminAddInternshipActivity extends AppCompatActivity {
         etWorkMode = findViewById(R.id.etWorkMode);
         etStipend = findViewById(R.id.etStipend);
         etDeadline = findViewById(R.id.etDeadline);
+        etDeadline.setOnClickListener(v -> showDeadlinePicker());
         etApplicationUrl = findViewById(R.id.etApplicationUrl);
 
 
@@ -55,6 +61,49 @@ public class AdminAddInternshipActivity extends AppCompatActivity {
 
         Button btnSave = findViewById(R.id.btnSaveInternship);
         btnSave.setOnClickListener(v -> saveInternship());
+
+        Button btnManageMentorship =
+                findViewById(R.id.btnManageMentorship);
+
+        btnManageMentorship.setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    AdminAddInternshipActivity.this,
+                    AdminMentorshipActivity.class
+            );
+
+            startActivity(intent);
+        });
+    }
+
+    private void showDeadlinePicker() {
+
+        Calendar calendar = Calendar.getInstance();
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, year, month, dayOfMonth) -> {
+
+                    Calendar selectedDate = Calendar.getInstance();
+                    selectedDate.set(year, month, dayOfMonth);
+
+                    SimpleDateFormat dateFormat =
+                            new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+
+                    etDeadline.setText(
+                            dateFormat.format(selectedDate.getTime())
+                    );
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
+
+        // Prevent selection of past application deadlines
+        datePickerDialog.getDatePicker().setMinDate(
+                System.currentTimeMillis() - 1000
+        );
+
+        datePickerDialog.show();
     }
 
     private void saveInternship() {

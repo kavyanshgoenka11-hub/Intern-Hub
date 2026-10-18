@@ -123,6 +123,9 @@
                 android:lineSpacingExtra="3dp" />
 
             <TextView
+                android:id="@+id/tvExploreRoadmap"
+                android:clickable="true"
+                android:focusable="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
@@ -165,13 +168,16 @@
             android:baselineAligned="false">
 
             <LinearLayout
+                android:id="@+id/cardCareerRoadmap"
                 android:layout_width="0dp"
                 android:layout_height="145dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="14dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -246,13 +252,16 @@
             android:baselineAligned="false">
 
             <LinearLayout
+                android:id="@+id/cardMentorship"
                 android:layout_width="0dp"
                 android:layout_height="145dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="14dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -280,13 +289,16 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/cardIndustryInsights"
                 android:layout_width="0dp"
                 android:layout_height="145dp"
                 android:layout_weight="1"
                 android:layout_marginStart="6dp"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="14dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -350,20 +362,13 @@
                 android:textColor="#68788A"
                 android:textSize="13sp" />
 
+            <LinearLayout
+                android:id="@+id/layoutUpcomingSessions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
         </LinearLayout>
-
-        <!-- Temporary admin entry point for development -->
-        <Button
-            android:id="@+id/btnOpenAdmin"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="#163653"
-            android:text="Admin: Add Internship"
-            android:textColor="#FFFFFF"
-            android:textSize="15sp" />
-
 
         <!-- Footer -->
         <TextView
