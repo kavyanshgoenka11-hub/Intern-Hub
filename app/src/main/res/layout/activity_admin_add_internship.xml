@@ -40,6 +40,19 @@
             android:textColor="#68788A"
             android:textSize="14sp" />
 
+        <!-- Faculty mentorship management -->
+        <Button
+            android:id="@+id/btnManageMentorship"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="18dp"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="#238B73"
+            android:text="Manage Faculty Mentorship"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp" />
+
         <!-- Internship title -->
         <TextView
             style="@style/FormLabel"
@@ -138,8 +151,12 @@
         <EditText
             android:id="@+id/etDeadline"
             style="@style/FormInput"
-            android:hint="YYYY-MM-DD"
-            android:inputType="date" />
+            android:hint="Select application deadline"
+            android:focusable="false"
+            android:clickable="true"
+            android:cursorVisible="false"
+            android:inputType="none"
+            android:contentDescription="Select application deadline" />
 
         <!-- Application URL -->
         <TextView

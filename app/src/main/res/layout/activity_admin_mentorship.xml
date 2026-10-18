@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F4F7FA"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/btnAdminMentorshipBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="←  Back"
+            android:textColor="#3B638D"
+            android:textSize="14sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Manage Faculty Mentorship"
+            android:textColor="#163653"
+            android:textSize="27sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Create and publish faculty sessions for students."
+            android:textColor="#68788A"
+            android:textSize="14sp" />
+
+        <!-- Session title -->
+        <TextView
+            style="@style/FormLabel"
+            android:text="Session title *" />
+
+        <EditText
+            android:id="@+id/etSessionTitle"
+            style="@style/FormInput"
+            android:hint="e.g. Internship Preparation"
+            android:inputType="textCapSentences" />
+
+        <!-- Faculty name -->
+        <TextView
+            style="@style/FormLabel"
+            android:text="Faculty name *" />
+
+        <EditText
+            android:id="@+id/etFacultyName"
+            style="@style/FormInput"
+            android:hint="Enter faculty name"
+            android:inputType="textCapWords" />
+
+        <!-- Topic -->
+        <TextView
+            style="@style/FormLabel"
+            android:text="Session topic *" />
+
+        <EditText
+            android:id="@+id/etSessionTopic"
+            style="@style/FormInput"
+            android:hint="e.g. Resume and Interview Skills"
+            android:inputType="textCapSentences" />
+
+        <!-- Date -->
+        <TextView
+            style="@style/FormLabel"
+            android:text="Session date * (YYYY-MM-DD)" />
+
+        <EditText
+            android:id="@+id/etSessionDate"
+            style="@style/FormInput"
+            android:hint="Select session date"
+            android:focusable="false"
+            android:clickable="true"
+            android:cursorVisible="false"
+            android:inputType="none"
+            android:contentDescription="Select faculty session date" />
+
+        <!-- Time -->
+        <TextView
+            style="@style/FormLabel"
+            android:text="Start time * (24-hour format)" />
+
+        <EditText
+            android:id="@+id/etSessionTime"
+            style="@style/FormInput"
+            android:hint="Select session time"
+            android:focusable="false"
+            android:clickable="true"
+            android:cursorVisible="false"
+            android:inputType="none"
+            android:contentDescription="Select faculty session time" />
+
+        <!-- Mode or location -->
+        <TextView
+            style="@style/FormLabel"
+            android:text="Mode / location" />
+
+        <EditText
+            android:id="@+id/etSessionMode"
+            style="@style/FormInput"
+            android:hint="e.g. Offline - Seminar Hall or Online"
+            android:inputType="textCapSentences" />
+
+        <!-- Description -->
+        <TextView
+            style="@style/FormLabel"
+            android:text="Session details *" />
+
+        <EditText
+            android:id="@+id/etSessionDetails"
+            style="@style/FormInput"
+            android:hint="Describe what students will learn"
+            android:gravity="top|start"
+            android:minLines="3"
+            android:inputType="textCapSentences|textMultiLine" />
+
+        <!-- Feedback / status -->
+        <TextView
+            android:id="@+id/tvAdminMentorshipMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textColor="#B42318"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+        <!-- Publish -->
+        <Button
+            android:id="@+id/btnPublishSession"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="28dp"
+            android:backgroundTint="#238B73"
+            android:text="Publish Faculty Session"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnViewMentorshipRequests"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginBottom="28dp"
+            android:backgroundTint="#163653"
+            android:text="View Student Requests"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+</ScrollView>

@@ -31,6 +31,30 @@
         </activity>
 
         <activity
+            android:name=".CareerRoadmapActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".MentorshipActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AdminMentorshipActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AdminMentorshipRequestsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".IndustryInsightsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
