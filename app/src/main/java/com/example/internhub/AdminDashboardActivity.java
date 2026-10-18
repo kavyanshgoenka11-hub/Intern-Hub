@@ -20,212 +20,85 @@ public class AdminDashboardActivity extends AppCompatActivity {
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-
-        // Require an authenticated user.
-
-        FirebaseUser user =
-
-                FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null) {
-
             openLoginScreen();
-
             return;
-
         }
 
         // Only the authorized admin can access this dashboard
         if (!ADMIN_UID.equals(user.getUid())) {
-
-            startActivity(new Intent(
-                    AdminDashboardActivity.this,
-                    MainActivity.class
-            ));
-
+            startActivity(new Intent(AdminDashboardActivity.this, MainActivity.class));
             finish();
             return;
         }
 
         setContentView(R.layout.activity_admin_dashboard);
-
-        // Display the admin's registered name.
-
-        TextView tvAdminWelcome =
-
-                findViewById(R.id.tvAdminWelcome);
+        TextView tvAdminWelcome = findViewById(R.id.tvAdminWelcome);
 
         String displayName = user.getDisplayName();
 
         if (displayName == null || displayName.trim().isEmpty()) {
-
-            if (user.getEmail() != null
-                    && user.getEmail().contains("@")) {
-
-                displayName =
-
-                        user.getEmail().substring(
-
-                                0,
-
-                                user.getEmail().indexOf("@")
-
-                        );
+            if (user.getEmail() != null && user.getEmail().contains("@")) {
+                displayName = user.getEmail().substring(0, user.getEmail().indexOf("@"));
 
             } else {
-
                 displayName = "Admin";
-
             }
-
         }
-
-        tvAdminWelcome.setText(
-
-                "Welcome back, " + displayName + " 👋"
-
-        );
+        tvAdminWelcome.setText("Welcome back, " + displayName + " 👋");
 
         // Add Internship
 
-        findViewById(R.id.btnAdminDashboardAddInternship)
-
-                .setOnClickListener(v -> {
-
-                    Intent intent = new Intent(
-
-                            AdminDashboardActivity.this,
-
-                            AdminAddInternshipActivity.class
-
-                    );
-
+        findViewById(R.id.btnAdminDashboardAddInternship).setOnClickListener(v -> {
+                    Intent intent = new Intent(AdminDashboardActivity.this, AdminAddInternshipActivity.class);
                     startActivity(intent);
-
                 });
 
-        // View Published Internships
-
-        findViewById(R.id.btnAdminDashboardViewInternships)
-
-                .setOnClickListener(v -> {
-
-                    Intent intent = new Intent(
-
-                            AdminDashboardActivity.this,
-
-                            InternshipActivity.class
-
-                    );
-
+        // Open Admin Internship Management
+        findViewById(R.id.btnAdminDashboardViewInternships).setOnClickListener(v -> {
+                    Intent intent = new Intent(AdminDashboardActivity.this, AdminManageInternshipsActivity.class);
                     startActivity(intent);
-
-                });
+        });
 
         // Manage Faculty Mentorship and student requests
 
-        findViewById(R.id.btnAdminDashboardMentorship)
-
-                .setOnClickListener(v -> {
-
-                    Intent intent = new Intent(
-
-                            AdminDashboardActivity.this,
-
-                            AdminMentorshipActivity.class
-
-                    );
-
+        findViewById(R.id.btnAdminDashboardMentorship).setOnClickListener(v -> {
+                    Intent intent = new Intent(AdminDashboardActivity.this, AdminMentorshipActivity.class);
                     startActivity(intent);
-
                 });
 
         // Industry Insights
-
-        findViewById(R.id.btnAdminDashboardInsights)
-
-                .setOnClickListener(v -> {
-
-                    Intent intent = new Intent(
-
-                            AdminDashboardActivity.this,
-
-                            IndustryInsightsActivity.class
-
-                    );
-
+        findViewById(R.id.btnAdminDashboardInsights).setOnClickListener(v -> {
+            Intent intent = new Intent(AdminDashboardActivity.this, IndustryInsightsActivity.class);
                     startActivity(intent);
-
                 });
 
         // Log Out
 
-        findViewById(R.id.btnAdminDashboardLogout)
-
-                .setOnClickListener(v ->
-
-                        new AlertDialog.Builder(
-
-                                AdminDashboardActivity.this
-
-                        )
-
-                                .setTitle("Log Out")
+        findViewById(R.id.btnAdminDashboardLogout).setOnClickListener(v ->
+                        new AlertDialog.Builder(AdminDashboardActivity.this).setTitle("Log Out")
 
                                 .setMessage(
-
                                         "Are you sure you want to log out?"
-
                                 )
-
                                 .setNegativeButton("Cancel", null)
-
                                 .setPositiveButton(
-
                                         "Log Out",
-
                                         (dialog, which) -> {
-
-                                            FirebaseAuth.getInstance()
-
-                                                    .signOut();
-
+                                            FirebaseAuth.getInstance().signOut();
                                             openLoginScreen();
-
                                         }
-
-                                )
-
-                                .show()
-
+                                ).show()
                 );
-
     }
 
     private void openLoginScreen() {
-
-        Intent intent = new Intent(
-
-                AdminDashboardActivity.this,
-
-                AuthActivity.class
-
-        );
-
-        intent.addFlags(
-
-                Intent.FLAG_ACTIVITY_NEW_TASK
-
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
-
-        );
-
+        Intent intent = new Intent(AdminDashboardActivity.this, AuthActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-
         finish();
-
     }
-
 }

@@ -24,6 +24,8 @@ import androidx.appcompat.app.AppCompatActivity;
 public class AdminAddInternshipActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
+    private String editDocumentId;
+    private Button btnSave;
 
     private EditText etTitle;
     private EditText etCompany;
@@ -59,18 +61,26 @@ public class AdminAddInternshipActivity extends AppCompatActivity {
         TextView btnBack = findViewById(R.id.btnAdminBack);
         btnBack.setOnClickListener(v -> finish());
 
-        Button btnSave = findViewById(R.id.btnSaveInternship);
+        btnSave = findViewById(R.id.btnSaveInternship);
+
+        editDocumentId = getIntent().getStringExtra("edit_document_id");
+
+        if (editDocumentId != null && editDocumentId.trim().isEmpty()) {
+            editDocumentId = null;
+        }
+
         btnSave.setOnClickListener(v -> saveInternship());
 
-        Button btnManageMentorship =
-                findViewById(R.id.btnManageMentorship);
+        if (editDocumentId != null) {
+            btnSave.setText("Loading Internship...");
+            btnSave.setEnabled(false);
+            loadInternshipForEditing();
+        }
+
+        Button btnManageMentorship = findViewById(R.id.btnManageMentorship);
 
         btnManageMentorship.setOnClickListener(v -> {
-            Intent intent = new Intent(
-                    AdminAddInternshipActivity.this,
-                    AdminMentorshipActivity.class
-            );
-
+            Intent intent = new Intent(AdminAddInternshipActivity.this, AdminMentorshipActivity.class);
             startActivity(intent);
         });
     }
@@ -79,19 +89,13 @@ public class AdminAddInternshipActivity extends AppCompatActivity {
 
         Calendar calendar = Calendar.getInstance();
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this,
-                (view, year, month, dayOfMonth) -> {
-
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
                     Calendar selectedDate = Calendar.getInstance();
                     selectedDate.set(year, month, dayOfMonth);
 
-                    SimpleDateFormat dateFormat =
-                            new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
-                    etDeadline.setText(
-                            dateFormat.format(selectedDate.getTime())
-                    );
+                    etDeadline.setText(dateFormat.format(selectedDate.getTime()));
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -99,11 +103,45 @@ public class AdminAddInternshipActivity extends AppCompatActivity {
         );
 
         // Prevent selection of past application deadlines
-        datePickerDialog.getDatePicker().setMinDate(
-                System.currentTimeMillis() - 1000
-        );
-
+        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
         datePickerDialog.show();
+    }
+
+    private void loadInternshipForEditing() {
+
+        FirebaseFirestore.getInstance()
+                .collection("internships")
+                .document(editDocumentId)
+                .get()
+                .addOnSuccessListener(document -> {
+
+                    if (!document.exists()) {
+                        Toast.makeText(this, "Internship not found.", Toast.LENGTH_LONG).show();
+                        finish();
+                        return;
+                    }
+
+                    etTitle.setText(document.getString("title"));
+                    etCompany.setText(document.getString("company"));
+                    etDomain.setText(document.getString("domain"));
+                    etSkills.setText(document.getString("required_skills"));
+                    etDescription.setText(document.getString("description"));
+                    etLocation.setText(document.getString("location"));
+                    etWorkMode.setText(document.getString("work_mode"));
+                    etStipend.setText(document.getString("stipend"));
+                    etDeadline.setText(document.getString("deadline"));
+                    etApplicationUrl.setText(document.getString("application_url"));
+
+                    btnSave.setText("Update Internship");
+                    btnSave.setEnabled(true);
+                })
+                .addOnFailureListener(error -> {
+
+                    Log.e("InternHubCloud", "Failed to load internship for editing", error);
+
+                    Toast.makeText(this, "Could not load internship details.", Toast.LENGTH_LONG).show();
+                    finish();
+                });
     }
 
     private void saveInternship() {
@@ -138,23 +176,12 @@ public class AdminAddInternshipActivity extends AppCompatActivity {
             return;
         }
 
-        String description =
-                etDescription.getText().toString().trim();
-
-        String location =
-                etLocation.getText().toString().trim();
-
-        String workMode =
-                etWorkMode.getText().toString().trim();
-
-        String stipend =
-                etStipend.getText().toString().trim();
-
-        String deadline =
-                etDeadline.getText().toString().trim();
-
-        String applicationUrl =
-                etApplicationUrl.getText().toString().trim();
+        String description = etDescription.getText().toString().trim();
+        String location = etLocation.getText().toString().trim();
+        String workMode = etWorkMode.getText().toString().trim();
+        String stipend = etStipend.getText().toString().trim();
+        String deadline = etDeadline.getText().toString().trim();
+        String applicationUrl = etApplicationUrl.getText().toString().trim();
 
         // Prepare the internship document
         Map<String, Object> internship = new HashMap<>();
@@ -170,36 +197,58 @@ public class AdminAddInternshipActivity extends AppCompatActivity {
         internship.put("deadline", deadline);
         internship.put("application_url", applicationUrl);
         internship.put("status", "approved");
-        internship.put("created_at", FieldValue.serverTimestamp());
+        if (editDocumentId == null) {
+            internship.put("created_at", FieldValue.serverTimestamp());
+        } else {
+            internship.put("updated_at", FieldValue.serverTimestamp());
+        }
 
-        // Save to Cloud Firestore
-        FirebaseFirestore.getInstance()
-                .collection("internships")
-                .add(internship)
-                .addOnSuccessListener(documentReference -> {
+        internship.put("status", "approved");
 
-                    Toast.makeText(
-                            AdminAddInternshipActivity.this,
-                            "Internship saved to cloud successfully!",
-                            Toast.LENGTH_LONG
-                    ).show();
+        // Save or update the internship in Cloud Firestore
+        btnSave.setEnabled(false);
+        btnSave.setText(editDocumentId == null ? "Saving..." : "Updating...");
 
-                    finish();
-                })
-                .addOnFailureListener(exception -> {
+        if (editDocumentId == null) {
 
-                    Log.e(
-                            "InternHubCloud",
-                            "Failed to save internship",
-                            exception
-                    );
+            // Create a new internship
+            FirebaseFirestore.getInstance()
+                    .collection("internships")
+                    .add(internship)
+                    .addOnSuccessListener(documentReference ->
+                            handleSaveSuccess(
+                                    "Internship saved successfully!"
+                            )
+                    )
+                    .addOnFailureListener(this::handleSaveFailure);
 
-                    Toast.makeText(
-                            AdminAddInternshipActivity.this,
-                            "Cloud save failed. Check access and connection.",
-                            Toast.LENGTH_LONG
-                    ).show();
-                });
+        } else {
+            // Update the existing Firestore document
+            FirebaseFirestore.getInstance()
+                    .collection("internships")
+                    .document(editDocumentId)
+                    .update(internship)
+                    .addOnSuccessListener(unused ->
+                            handleSaveSuccess(
+                                    "Internship updated successfully!"
+                            )
+                    )
+                    .addOnFailureListener(this::handleSaveFailure);
+        }
+    }
+
+    private void handleSaveSuccess(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        finish();
+    }
+
+    private void handleSaveFailure(Exception exception) {
+        Log.e("InternHubCloud", "Failed to save internship", exception);
+
+        btnSave.setEnabled(true);
+        btnSave.setText(editDocumentId == null ? "Save Internship" : "Update Internship");
+
+        Toast.makeText(this, "Save failed. Check your connection and Firestore permissions.", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -207,7 +256,6 @@ public class AdminAddInternshipActivity extends AppCompatActivity {
         if (databaseHelper != null) {
             databaseHelper.close();
         }
-
         super.onDestroy();
     }
 }

@@ -26,7 +26,6 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 public class AuthActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
-
     private EditText etEmail;
     private EditText etPassword;
     private EditText etConfirmPassword;
@@ -180,9 +179,7 @@ public class AuthActivity extends AppCompatActivity {
                         if (exception instanceof
                                 FirebaseAuthUserCollisionException) {
 
-                            showMessage(
-                                    "An account with this email already exists."
-                            );
+                            showMessage("An account with this email already exists.");
 
                         } else if (exception instanceof
                                 FirebaseAuthWeakPasswordException) {
@@ -192,14 +189,10 @@ public class AuthActivity extends AppCompatActivity {
                         } else if (exception instanceof
                                 FirebaseAuthInvalidCredentialsException) {
 
-                            showMessage(
-                                    "Please check your email address and password."
-                            );
+                            showMessage("Please check your email address and password.");
 
                         } else {
-                            showMessage(
-                                    "Registration failed. Check your connection and try again."
-                            );
+                            showMessage("Registration failed. Check your connection and try again.");
                         }
 
                         return;
@@ -211,9 +204,7 @@ public class AuthActivity extends AppCompatActivity {
                         setLoading(false);
                         firebaseAuth.signOut();
 
-                        showMessage(
-                                "Account created, but the user profile could not be loaded."
-                        );
+                        showMessage("Account created, but the user profile could not be loaded.");
                         return;
                     }
 
@@ -229,29 +220,17 @@ public class AuthActivity extends AppCompatActivity {
 
                                 if (profileTask.isSuccessful()) {
 
-                                    Toast.makeText(
-                                            AuthActivity.this,
-                                            "Account created successfully!",
-                                            Toast.LENGTH_SHORT
-                                    ).show();
-
+                                    Toast.makeText(AuthActivity.this, "Account created successfully!", Toast.LENGTH_SHORT).show();
                                     openDashboard();
 
                                 } else {
 
-                                    Log.e(
-                                            "InternHubAuth",
-                                            "Failed to save display name",
-                                            profileTask.getException()
-                                    );
+                                    Log.e("InternHubAuth", "Failed to save display name", profileTask.getException());
 
                                     firebaseAuth.signOut();
                                     isRegisterMode = false;
                                     updateScreen();
-
-                                    showMessage(
-                                            "Account created, but saving your name failed. Please sign in."
-                                    );
+                                    showMessage("Account created, but saving your name failed. Please sign in.");
                                 }
                             });
                 });
@@ -269,13 +248,9 @@ public class AuthActivity extends AppCompatActivity {
             setLoading(false);
 
             if (task.isSuccessful()) {
-
                 Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
-
                 openDashboard();
-
             } else {
-
                 showMessage("Login failed. Check your email and password.");
             }
         });

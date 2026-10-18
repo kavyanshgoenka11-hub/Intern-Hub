@@ -51,16 +51,9 @@ public class InternshipActivity extends AppCompatActivity {
                 .addSnapshotListener((snapshots, error) -> {
 
                     if (error != null) {
-                        tvInternshipCount.setText(
-                                "Unable to load internships"
-                        );
+                        tvInternshipCount.setText("Unable to load internships");
 
-                        android.util.Log.e(
-                                "InternHubCloud",
-                                "Failed to read internships",
-                                error
-                        );
-
+                        android.util.Log.e("InternHubCloud", "Failed to read internships", error);
                         return;
                     }
 
@@ -75,9 +68,7 @@ public class InternshipActivity extends AppCompatActivity {
                     int count = 0;
 
                     for (DocumentSnapshot document :
-
                             snapshots.getDocuments()) {
-
                         String status = document.getString("status");
 
                         if (!"approved".equals(status)) {
