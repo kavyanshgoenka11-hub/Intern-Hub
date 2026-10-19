@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
@@ -40,10 +39,7 @@ import androidx.appcompat.app.AlertDialog;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "InternHubDB";
     private static final String ADMIN_UID = "N27yzmpye7ehzJpkIwUOvLUzJHy1";
-
-    private DatabaseHelper databaseHelper;
     private TextView tvUpcomingMessage;
     private LinearLayout layoutUpcomingSessions;
 
@@ -59,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
         if (currentUser == null) {
 
             Intent authIntent = new Intent(MainActivity.this, AuthActivity.class);
-
             startActivity(authIntent);
             finish();
             return;
@@ -68,11 +63,7 @@ public class MainActivity extends AppCompatActivity {
 // Route the authorized admin to the Admin Dashboard
         if (ADMIN_UID.equals(currentUser.getUid())) {
 
-            Intent adminIntent = new Intent(
-                    MainActivity.this,
-                    AdminDashboardActivity.class
-            );
-
+            Intent adminIntent = new Intent(MainActivity.this, AdminDashboardActivity.class);
             startActivity(adminIntent);
             finish();
             return;
@@ -86,9 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
         loadUpcomingMentorship();
 
-        // Open Career Roadmap
-        LinearLayout cardCareerRoadmap =
-                findViewById(R.id.cardCareerRoadmap);
+        LinearLayout cardCareerRoadmap = findViewById(R.id.cardCareerRoadmap);
 
         cardCareerRoadmap.setOnClickListener(v -> {
             Intent intent = new Intent(
@@ -99,43 +88,23 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Open Career Roadmap from the hero banner
         findViewById(R.id.tvExploreRoadmap).setOnClickListener(v -> {
-            Intent intent = new Intent(
-                    MainActivity.this,
-                    CareerRoadmapActivity.class
-            );
+            Intent intent = new Intent(MainActivity.this, CareerRoadmapActivity.class);
             startActivity(intent);
         });
-
-        // Open Industry Insights
 
         findViewById(R.id.cardIndustryInsights).setOnClickListener(v -> {
 
-            Intent intent = new Intent(
-
-                    MainActivity.this,
-
-                    IndustryInsightsActivity.class
-
-            );
-
+            Intent intent = new Intent(MainActivity.this, IndustryInsightsActivity.class);
             startActivity(intent);
 
         });
 
-
-        // Open Faculty Mentorship
         findViewById(R.id.cardMentorship).setOnClickListener(v -> {
-            Intent intent = new Intent(
-                    MainActivity.this,
-                    MentorshipActivity.class
-            );
-
+            Intent intent = new Intent(MainActivity.this, MentorshipActivity.class);
             startActivity(intent);
         });
 
-        // Profile dropdown menu
         TextView btnProfileMenu = findViewById(R.id.btnProfileMenu);
 
         btnProfileMenu.setOnClickListener(view -> {
@@ -147,18 +116,14 @@ public class MainActivity extends AppCompatActivity {
             popupMenu.getMenu().add(Menu.NONE, 3, 3, "Log Out");
 
             popupMenu.setOnMenuItemClickListener(item -> {
-
                 if (item.getItemId() == 1) {
-
-                    FirebaseUser user =
-                            FirebaseAuth.getInstance().getCurrentUser();
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
                     String name = "Student";
                     String email = "Not available";
 
                     if (user != null) {
-                        if (user.getDisplayName() != null
-                                && !user.getDisplayName().trim().isEmpty()) {
+                        if (user.getDisplayName() != null && !user.getDisplayName().trim().isEmpty()) {
                             name = user.getDisplayName();
                         }
 
@@ -172,15 +137,13 @@ public class MainActivity extends AppCompatActivity {
                             .setMessage("Name: " + name + "\nEmail: " + email)
                             .setPositiveButton("Close", null)
                             .show();
-
                     return true;
 
                 } else if (item.getItemId() == 2) {
 
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle("Help & Support")
-                            .setMessage(
-                                    "Welcome to Intern Hub.\n\n"
+                            .setMessage("Welcome to Intern Hub.\n\n"
                                             + "Use the dashboard to explore internships, "
                                             + "career preparation and mentorship.\n\n"
                                             + "For further assistance : \n\n Contact: "
@@ -189,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
                             )
                             .setPositiveButton("Close", null)
                             .show();
-
                     return true;
 
                 } else if (item.getItemId() == 3) {
@@ -202,20 +164,12 @@ public class MainActivity extends AppCompatActivity {
 
                                 FirebaseAuth.getInstance().signOut();
 
-                                Intent intent = new Intent(
-                                        MainActivity.this,
-                                        AuthActivity.class
-                                );
+                                Intent intent = new Intent(MainActivity.this, AuthActivity.class);
 
-                                intent.addFlags(
-                                        Intent.FLAG_ACTIVITY_NEW_TASK
-                                                | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                );
-
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent);
                                 finish();
-                            })
-                            .show();
+                            }).show();
 
                     return true;
                 }
@@ -259,459 +213,201 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.main), (v, insets) -> {
 
                     Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-
                     v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-
                     return insets;
                 }
         );
 
-        // Open Internship Explorer when the card is clicked
         findViewById(R.id.cardInternships).setOnClickListener(v -> {
-            Intent intent = new Intent(
-                    MainActivity.this,
-                    InternshipActivity.class
-            );
-
+            Intent intent = new Intent(MainActivity.this, InternshipActivity.class);
             startActivity(intent);
         });
 
-        // Initialize the database helper
-        databaseHelper = new DatabaseHelper(this);
-        testDatabase();
-    }
-
-    private void testDatabase() {
-
-        // Check whether an approved internship already exists
-        Cursor existingCursor = databaseHelper.getApprovedInternships();
-
-        boolean hasInternship = existingCursor.moveToFirst();
-        existingCursor.close();
-
-        // Insert sample data only if the table has no approved internship
-        if (!hasInternship) {
-            long insertedId = databaseHelper.insertInternship(
-                    "Software Development Intern",
-                    "Example Technologies",
-                    "Software Development",
-                    "Java, SQL, Git",
-                    "Sample internship record for database testing.",
-                    "Pune",
-                    "Hybrid",
-                    "15000 per month",
-                    "2026-11-30",
-                    "https://example.com/apply"
-            );
-
-            Log.d(TAG, "Inserted internship ID: " + insertedId);
-        }
-
-        // Retrieve internships from the database
-        Cursor cursor = databaseHelper.getApprovedInternships();
-
-        Log.d(TAG, "Approved internships count: " + cursor.getCount());
-
-        while (cursor.moveToNext()) {
-
-            String title = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_TITLE));
-
-            String company = cursor.getString(
-                    cursor.getColumnIndexOrThrow(DatabaseHelper.COL_COMPANY)
-            );
-
-            String skills = cursor.getString(
-                    cursor.getColumnIndexOrThrow(DatabaseHelper.COL_SKILLS)
-            );
-
-            Log.d(TAG, "Title: " + title);
-            Log.d(TAG, "Company: " + company);
-            Log.d(TAG, "Skills: " + skills);
-        }
-
-        cursor.close();
     }
 
     private void loadUpcomingMentorship() {
 
         upcomingSessionsListener = FirebaseFirestore.getInstance()
-
                 .collection("facultySessions")
-
                 .whereEqualTo("status", "published")
-
                 .addSnapshotListener((snapshots, error) -> {
-
                     if (error != null) {
+                        Log.e("InternHubUpcoming", "Failed to load upcoming mentorship", error);
 
-                        Log.e(
-
-                                "InternHubUpcoming",
-
-                                "Failed to load upcoming mentorship",
-
-                                error
-
-                        );
-
-                        showUpcomingMessage(
-
-                                "Unable to load upcoming sessions."
-
-                        );
-
+                        showUpcomingMessage("Unable to load upcoming sessions.");
                         return;
-
                     }
-
                     if (snapshots == null) {
-
                         return;
 
                     }
-
-                    List<UpcomingFacultySession> upcomingSessions =
-
-                            new ArrayList<>();
-
-                    SimpleDateFormat formatter =
-
-                            new SimpleDateFormat(
-
-                                    "yyyy-MM-dd HH:mm",
-
-                                    Locale.US
-
-                            );
-
+                    List<UpcomingFacultySession> upcomingSessions = new ArrayList<>();
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
                     formatter.setLenient(false);
 
                     Date now = new Date();
-
                     for (DocumentSnapshot document :
-
                             snapshots.getDocuments()) {
-
                         String status = document.getString("status");
 
                         if (!"published".equals(status)) {
-
                             continue;
-
                         }
-
                         String title = document.getString("title");
-
-                        String faculty =
-
-                                document.getString("faculty_name");
-
+                        String faculty = document.getString("faculty_name");
                         String date = document.getString("date");
-
                         String time = document.getString("time");
-
                         String mode = document.getString("mode");
-
                         if (title == null || date == null || time == null) {
-
                             continue;
-
                         }
 
                         Date scheduledAt;
-
                         try {
-
                             scheduledAt = formatter.parse(date + " " + time);
-
                         } catch (ParseException exception) {
-
-                            Log.w(
-
-                                    "InternHubUpcoming",
-
-                                    "Invalid session date/time: "
-
-                                            + document.getId()
-
-                            );
-
+                            Log.w("InternHubUpcoming", "Invalid session date/time: " + document.getId());
                             continue;
-
+                        }
+                        if (scheduledAt == null || !scheduledAt.after(now)) {
+                            continue;
                         }
 
-                        if (scheduledAt == null
-
-                                || !scheduledAt.after(now)) {
-
-                            continue;
-
-                        }
-
-                        upcomingSessions.add(
-
-                                new UpcomingFacultySession(
-
-                                        title,
-
-                                        faculty == null
-
-                                                ? "Faculty not specified"
-
-                                                : faculty,
-
-                                        date,
-
-                                        time,
-
-                                        mode == null || mode.trim().isEmpty()
-
-                                                ? "Not specified"
-
-                                                : mode,
-
+                        upcomingSessions.add(new UpcomingFacultySession(title, faculty == null ? "Faculty not specified" : faculty,
+                                        date,time, mode == null || mode.trim().isEmpty() ? "Not specified" : mode,
                                         scheduledAt
-
                                 )
-
                         );
-
                     }
-
-                    Collections.sort(
-
-                            upcomingSessions,
-
-                            Comparator.comparing(
-
-                                    session -> session.scheduledAt
-
+                    Collections.sort(upcomingSessions, Comparator.comparing(
+                            session -> session.scheduledAt
                             )
-
                     );
-
                     displayUpcomingMentorship(upcomingSessions);
-
                 });
-
     }
 
     private void displayUpcomingMentorship(
-
             List<UpcomingFacultySession> sessions
-
     ) {
 
         layoutUpcomingSessions.removeAllViews();
 
         if (sessions.isEmpty()) {
-
-            showUpcomingMessage(
-
-                    "No upcoming published mentorship sessions at the moment."
-
-            );
-
+            showUpcomingMessage("No upcoming published mentorship sessions at the moment.");
             return;
-
         }
 
         tvUpcomingMessage.setVisibility(View.GONE);
 
-        // Display the next three sessions.
-
         int displayCount = Math.min(3, sessions.size());
-
         for (int i = 0; i < displayCount; i++) {
-
             UpcomingFacultySession session = sessions.get(i);
-
             LinearLayout item = new LinearLayout(this);
-
             item.setOrientation(LinearLayout.VERTICAL);
-
-            LinearLayout.LayoutParams params =
-
-                    new LinearLayout.LayoutParams(
-
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
-
                             LinearLayout.LayoutParams.WRAP_CONTENT
-
                     );
 
             params.bottomMargin = dpToPx(14);
-
             item.setLayoutParams(params);
-
             TextView title = createUpcomingText(
-
                     session.title,
-
                     15,
-
                     "#163653",
-
                     true
-
             );
-
             TextView faculty = createUpcomingText(
-
                     "Faculty: " + session.faculty,
-
                     13,
-
                     "#3B638D",
-
                     false
-
             );
 
             faculty.setPadding(0, dpToPx(5), 0, 0);
-
             TextView schedule = createUpcomingText(
-
                     "Date: " + session.date
-
                             + "\nTime: " + session.time
-
                             + "\nMode: " + session.mode,
-
                     13,
-
                     "#68788A",
-
                     false
-
             );
 
             schedule.setPadding(0, dpToPx(5), 0, 0);
-
             item.addView(title);
-
             item.addView(faculty);
-
             item.addView(schedule);
-
             layoutUpcomingSessions.addView(item);
-
         }
 
     }
 
     private void showUpcomingMessage(String message) {
-
         layoutUpcomingSessions.removeAllViews();
-
         tvUpcomingMessage.setText(message);
-
         tvUpcomingMessage.setVisibility(View.VISIBLE);
-
     }
 
     private TextView createUpcomingText(
-
             String text,
-
             float size,
-
             String color,
-
             boolean bold
-
     ) {
 
         TextView textView = new TextView(this);
-
         textView.setText(text);
-
         textView.setTextSize(size);
-
         textView.setTextColor(Color.parseColor(color));
-
         if (bold) {
-
             textView.setTypeface(null, Typeface.BOLD);
-
         }
-
         return textView;
-
     }
 
     private int dpToPx(int dp) {
-
         return Math.round(
-
                 dp * getResources()
-
                         .getDisplayMetrics()
-
                         .density
-
         );
 
     }
 
     private static class UpcomingFacultySession {
-
         String title;
-
         String faculty;
-
         String date;
-
         String time;
-
         String mode;
-
         Date scheduledAt;
 
         UpcomingFacultySession(
-
                 String title,
-
                 String faculty,
-
                 String date,
-
                 String time,
-
                 String mode,
-
                 Date scheduledAt
-
         ) {
 
             this.title = title;
-
             this.faculty = faculty;
-
             this.date = date;
-
             this.time = time;
-
             this.mode = mode;
-
             this.scheduledAt = scheduledAt;
-
         }
-
     }
 
 
     @Override
     protected void onDestroy() {
-
         if (upcomingSessionsListener != null) {
             upcomingSessionsListener.remove();
         }
-
-        if (databaseHelper != null) {
-            databaseHelper.close();
-        }
-
         super.onDestroy();
     }
 }

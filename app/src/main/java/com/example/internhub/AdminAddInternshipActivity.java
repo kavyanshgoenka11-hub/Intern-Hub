@@ -22,8 +22,6 @@ import java.util.Map;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class AdminAddInternshipActivity extends AppCompatActivity {
-
-    private DatabaseHelper databaseHelper;
     private String editDocumentId;
     private Button btnSave;
 
@@ -42,8 +40,6 @@ public class AdminAddInternshipActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_add_internship);
-
-        databaseHelper = new DatabaseHelper(this);
 
         etTitle = findViewById(R.id.etTitle);
         etCompany = findViewById(R.id.etCompany);
@@ -249,13 +245,5 @@ public class AdminAddInternshipActivity extends AppCompatActivity {
         btnSave.setText(editDocumentId == null ? "Save Internship" : "Update Internship");
 
         Toast.makeText(this, "Save failed. Check your connection and Firestore permissions.", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (databaseHelper != null) {
-            databaseHelper.close();
-        }
-        super.onDestroy();
     }
 }
