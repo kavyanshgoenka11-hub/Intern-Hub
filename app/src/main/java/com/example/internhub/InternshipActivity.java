@@ -1,26 +1,26 @@
 package com.example.internhub;
 
-import android.database.Cursor;
 import android.graphics.Color;
-import android.os.Bundle;
+import android.graphics.Typeface;
 import android.view.Gravity;
 import android.view.View;
+import android.os.Bundle;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 public class InternshipActivity extends AppCompatActivity {
 
-    private DatabaseHelper databaseHelper;
+    private static final String TAG = "InternHubCloud";
+
     private ListenerRegistration internshipListener;
+
     private LinearLayout internshipList;
     private TextView tvInternshipCount;
 
@@ -29,13 +29,10 @@ public class InternshipActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_internships);
 
-        databaseHelper = new DatabaseHelper(this);
-
         internshipList = findViewById(R.id.internshipList);
         tvInternshipCount = findViewById(R.id.tvInternshipCount);
 
         TextView btnBack = findViewById(R.id.btnBack);
-
         btnBack.setOnClickListener(v -> finish());
 
         loadInternshipsFromCloud();
@@ -43,7 +40,7 @@ public class InternshipActivity extends AppCompatActivity {
 
     private void loadInternshipsFromCloud() {
 
-        internshipList.removeAllViews();
+        tvInternshipCount.setText("Loading internships...");
 
         internshipListener = FirebaseFirestore.getInstance()
                 .collection("internships")
@@ -51,9 +48,22 @@ public class InternshipActivity extends AppCompatActivity {
                 .addSnapshotListener((snapshots, error) -> {
 
                     if (error != null) {
-                        tvInternshipCount.setText("Unable to load internships");
 
-                        android.util.Log.e("InternHubCloud", "Failed to read internships", error);
+                        Log.e(
+                                TAG,
+                                "Failed to load internships from Firestore",
+                                error
+                        );
+
+                        tvInternshipCount.setText(
+                                "Unable to load internships"
+                        );
+
+                        showMessage(
+                                "Please check your internet connection "
+                                        + "and try again."
+                        );
+
                         return;
                     }
 
@@ -63,95 +73,72 @@ public class InternshipActivity extends AppCompatActivity {
 
                     internshipList.removeAllViews();
 
-                    List<String> activeCloudIds = new ArrayList<>();
-
                     int count = 0;
 
-                    for (DocumentSnapshot document :
-                            snapshots.getDocuments()) {
+                    for (DocumentSnapshot document
+                            : snapshots.getDocuments()) {
+
                         String status = document.getString("status");
 
                         if (!"approved".equals(status)) {
                             continue;
                         }
 
-                        activeCloudIds.add(document.getId());
+                        String title = safe(
+                                document.getString("title")
+                        );
 
-                        String title = document.getString("title");
-                        String company = document.getString("company");
-                        String domain = document.getString("domain");
-                        String skills = document.getString("required_skills");
-                        String location = document.getString("location");
-                        String workMode = document.getString("work_mode");
-                        String stipend = document.getString("stipend");
-                        String deadline = document.getString("deadline");
-                        String description = document.getString("description");
-                        String applicationUrl = document.getString("application_url");
+                        String company = safe(
+                                document.getString("company")
+                        );
 
-// Save or update this cloud record in local SQLite
-                        long localId = databaseHelper.upsertCloudInternship(
-                                document.getId(),
+                        String domain = safe(
+                                document.getString("domain")
+                        );
+
+                        String skills = safe(
+                                document.getString("required_skills")
+                        );
+
+                        String location = safe(
+                                document.getString("location")
+                        );
+
+                        String workMode = safe(
+                                document.getString("work_mode")
+                        );
+
+                        String stipend = safe(
+                                document.getString("stipend")
+                        );
+
+                        String deadline = safe(
+                                document.getString("deadline")
+                        );
+
+                        addInternshipCard(
                                 title,
                                 company,
                                 domain,
                                 skills,
-                                description,
                                 location,
                                 workMode,
                                 stipend,
-                                deadline,
-                                applicationUrl,
-                                status
-                        );
-
-                        if (localId == -1) {
-                            android.util.Log.e(
-                                    "InternHubSync",
-                                    "Failed to sync internship: " + document.getId()
-                            );
-                        }
-
-                        addInternshipCard(
-                                title == null ? "" : title,
-                                company == null ? "" : company,
-                                domain == null ? "" : domain,
-                                skills == null ? "" : skills,
-                                location == null ? "" : location,
-                                workMode == null ? "" : workMode,
-                                stipend == null ? "" : stipend,
-                                deadline == null ? "" : deadline
+                                deadline
                         );
 
                         count++;
                     }
 
-                    // Delete stale cloud records only after a server-confirmed snapshot.
-                    if (!snapshots.getMetadata().isFromCache()
-                            && !snapshots.getMetadata().hasPendingWrites()) {
-
-                        int removedCount =
-                                databaseHelper.deleteCloudInternshipsNotIn(activeCloudIds);
-
-                        android.util.Log.d(
-                                "InternHubSync",
-                                "Stale cloud records removed: " + removedCount
-                        );
-                    }
-
-                    tvInternshipCount.setText("Available internships (" + count + ")");
+                    tvInternshipCount.setText(
+                            "Available internships (" + count + ")"
+                    );
 
                     if (count == 0) {
-                        TextView emptyMessage = createTextView(
+                        showMessage(
                                 "No internships available yet.\n"
-                                        + "Please check again later.",
-                                14,
-                                "#68788A"
+                                        + "Please check again later."
                         );
-
-                        emptyMessage.setGravity(Gravity.CENTER);
-                        emptyMessage.setPadding(20, 40, 20, 40);
-
-                        internshipList.addView(emptyMessage);
                     }
                 });
     }
@@ -180,13 +167,13 @@ public class InternshipActivity extends AppCompatActivity {
                 );
 
         cardParams.setMargins(0, 0, 0, 14);
-
         card.setLayoutParams(cardParams);
 
         TextView titleView = createTextView(
                 title, 19, "#163653"
         );
-        titleView.setTypeface(null, android.graphics.Typeface.BOLD);
+
+        titleView.setTypeface(null, Typeface.BOLD);
 
         TextView companyView = createTextView(
                 company, 14, "#3B638D"
@@ -243,20 +230,39 @@ public class InternshipActivity extends AppCompatActivity {
                 );
 
         params.setMargins(0, 0, 0, 6);
-
         textView.setLayoutParams(params);
 
         return textView;
     }
 
+    private String safe(String value) {
+
+        return value == null || value.trim().isEmpty()
+                ? "Not specified"
+                : value;
+    }
+
+    private void showMessage(String message) {
+
+        internshipList.removeAllViews();
+
+        TextView emptyMessage = createTextView(
+                message,
+                14,
+                "#68788A"
+        );
+
+        emptyMessage.setGravity(Gravity.CENTER);
+        emptyMessage.setPadding(20, 40, 20, 40);
+
+        internshipList.addView(emptyMessage);
+    }
+
     @Override
     protected void onDestroy() {
 
-        if (databaseHelper != null) {
-            if (internshipListener != null) {
-                internshipListener.remove();
-            }
-            databaseHelper.close();
+        if (internshipListener != null) {
+            internshipListener.remove();
         }
 
         super.onDestroy();

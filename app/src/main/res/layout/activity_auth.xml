@@ -12,7 +12,26 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:padding="24dp">
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="20dp">
+
+        <!-- NMIMS institutional branding -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="155dp"
+                android:layout_height="102dp"
+                android:src="@drawable/nmims_logo"
+                android:scaleType="fitCenter"
+                android:contentDescription="NMIMS official logo" />
+
+        </LinearLayout>
 
         <!-- Logo -->
         <TextView
