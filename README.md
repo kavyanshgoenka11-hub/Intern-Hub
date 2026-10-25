@@ -194,8 +194,3 @@ This is a representative overview; the project contains additional activity clas
 - Alumni mentorship is outside the current submission scope and may be considered for future development.
 - Further improvements could include stronger role management, additional input validation, automated tests, and richer filtering and search for internships.
 
-## Contributors
-
-Developed by the project team as a third-year engineering MAD mini-project at **NMIMS Shirpur**.
-
-Update this section with the final contributor names, guide's name, and academic division before submission.
